@@ -1,11 +1,12 @@
 import React from 'react';
 import { UserCircle } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { APP_CONFIG } from '../constants';
 import Button from './atoms/Button';
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getTitle = () => {
     const path = location.pathname;
@@ -28,7 +29,12 @@ const Header = () => {
             {APP_CONFIG.companyName}
           </p>
         </div>
-        <Button variant="ghost" size="square" className="rounded-2xl bg-slate-50 border-slate-100/50">
+        <Button
+          variant="ghost"
+          size="square"
+          className="rounded-2xl bg-slate-50 border-slate-100/50"
+          onClick={() => navigate('/settings')}
+        >
           <UserCircle size={26} strokeWidth={1.5} />
         </Button>
       </div>

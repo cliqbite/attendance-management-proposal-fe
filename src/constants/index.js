@@ -7,13 +7,12 @@ export const APP_CONFIG = {
   version: '2.0.0-gold'
 };
 
-// Navigation Items
+// Navigation Items - Settings removed as per request to move it to profile icon
 export const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Users, label: 'Employees', path: '/employees' },
   { icon: CalendarCheck, label: 'Attendance', path: '/attendance' },
   { icon: FileText, label: 'Reports', path: '/reports' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
 // Dashboard Metrics Config
