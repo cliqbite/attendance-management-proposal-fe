@@ -7,7 +7,7 @@ const EmployeeRow = ({ data, index, onDetailClick }) => {
   return (
     <div
       onClick={() => onDetailClick(employee)}
-      className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm active:scale-[0.98] transition-all cursor-pointer flex justify-between items-center group hover:border-brand-100 hover:shadow-md h-24"
+      className="bg-white p-5 rounded-4xl border border-slate-100 shadow-sm active:scale-[0.98] transition-all cursor-pointer flex justify-between items-center group hover:border-brand-100 hover:shadow-md h-24"
     >
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center font-black text-xs group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">

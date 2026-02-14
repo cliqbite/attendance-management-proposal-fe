@@ -20,7 +20,7 @@ const BottomNav = () => {
             <>
               <item.icon
                 size={20}
-                className={isActive ? 'stroke-[3]' : 'stroke-[2]'}
+                className={isActive ? 'stroke-3' : 'stroke-2'}
               />
               <span className="text-[10px] font-black tracking-widest uppercase leading-none">
                 {item.label}

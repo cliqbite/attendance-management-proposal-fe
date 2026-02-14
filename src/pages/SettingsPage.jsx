@@ -44,7 +44,7 @@ const SettingsPage = () => {
         </div>
 
         {/* User Card */}
-        <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 mb-8">
+        <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm overflow-hidden flex items-center gap-4 mb-8">
           <div className="w-14 h-14 bg-linear-to-br from-brand-600 to-brand-700 rounded-3xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-100">
             {CURRENT_USER.avatar}
           </div>
@@ -77,7 +77,7 @@ const SettingsPage = () => {
 
                   {/* Password Form Expansion */}
                   {isPasswordFormOpen && item.label === 'Change Password' && (
-                    <form onSubmit={handleSubmit} className="mt-3 bg-white p-5 rounded-[2rem] border border-brand-100 shadow-lg shadow-brand-50/50 animate-fade-in space-y-4">
+                    <form onSubmit={handleSubmit} className="mt-3 bg-white p-5 rounded-4xl border border-brand-100 shadow-lg shadow-brand-50/50 animate-fade-in space-y-4">
                       {msg.text && (
                         <div className={cn("flex items-center gap-2 p-3 rounded-xl text-[10px] font-black uppercase tracking-wider", msg.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>
                           {msg.type === 'success' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}

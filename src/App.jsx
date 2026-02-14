@@ -18,6 +18,8 @@ function App() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
   // Fetch Employees
   const { data: employees = [], isLoading } = useQuery({
@@ -114,7 +116,7 @@ function App() {
   return (
     <BrowserRouter>
       {/* Root Container: Force height to 100dvh and hide overflow to prevent window scrolling */}
-      <div className="h-[100dvh] bg-slate-50 font-sans overflow-hidden flex flex-col relative">
+      <div className="h-dvh bg-slate-50 font-sans overflow-hidden flex flex-col relative">
         <Header />
 
         {/* Main Content Area: Flex-1 to fill space, also hide overflow to let children manage it */}
@@ -127,6 +129,8 @@ function App() {
               element={
                 <AttendancePage
                   employees={employees}
+                  selectedDate={currentDate}
+                  onDateChange={setCurrentDate}
                   onStatusChange={handleStatusChange}
                   onOTToggle={handleOTToggle}
                   onOTChange={handleOTChange}
@@ -139,7 +143,17 @@ function App() {
                 />
               }
             />
-            <Route path="/employees" element={<EmployeesPage employees={employees} onDetailClick={openDetails} />} />
+            <Route
+              path="/employees"
+              element={
+                <EmployeesPage
+                  employees={employees}
+                  onDetailClick={openDetails}
+                  selectedMonth={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                />
+              }
+            />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

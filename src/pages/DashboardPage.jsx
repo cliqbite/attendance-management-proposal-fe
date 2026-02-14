@@ -37,7 +37,7 @@ const DashboardPage = ({ stats }) => {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-8">
           {DASHBOARD_STATS_CONFIG.map((stat) => (
-            <div key={stat.key} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm group hover:border-brand-100 hover:shadow-brand-50/50 transition-all duration-500">
+            <div key={stat.key} className="bg-white p-5 rounded-4xl border border-slate-100 shadow-sm group hover:border-brand-100 hover:shadow-brand-50/50 transition-all duration-500">
               <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", stat.bg, stat.color)}>
                 <stat.icon size={20} strokeWidth={2.5} />
               </div>

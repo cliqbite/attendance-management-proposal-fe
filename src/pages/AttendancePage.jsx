@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import VirtualizedAttendanceList from '../components/VirtualizedAttendanceList';
 import AttendanceRow from '../components/AttendanceRow';
 import Button from '../components/atoms/Button';
@@ -7,6 +7,8 @@ import { cn } from '../utils/cn';
 
 const AttendancePage = ({
   employees,
+  selectedDate,
+  onDateChange,
   onStatusChange,
   onOTToggle,
   onOTChange,
@@ -19,12 +21,32 @@ const AttendancePage = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPublicHoliday, setIsPublicHoliday] = useState(false);
+  const dateInputRef = useRef(null);
 
-  const isSunday = false;
+  const isSunday = new Date(selectedDate).getDay() === 0;
 
   const handlePublicHolidayChange = (val) => {
     setIsPublicHoliday(val);
     if (onPublicHolidayToggle) onPublicHolidayToggle(val);
+  };
+
+  const formatDateLabel = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const handleDateButtonClick = () => {
+    if (dateInputRef.current) {
+      if ('showPicker' in HTMLInputElement.prototype) {
+        dateInputRef.current.showPicker();
+      } else {
+        dateInputRef.current.click();
+      }
+    }
   };
 
   return (
@@ -32,11 +54,25 @@ const AttendancePage = ({
       {/* HEADER SECTION - NO OVERFLOW OR STICKY, JUST FLEX-NONE */}
       <div className="flex-none bg-white border-b border-slate-100 z-30 shadow-sm relative">
         <div className="px-4 pt-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar items-center">
-          <Button variant="secondary" size="sm" className="gap-2 shrink-0">
-            <Calendar size={14} className="text-brand-600" />
-            <span className="truncate">Feb 14, 2026</span>
-            <ChevronDown size={12} className="text-slate-400" />
-          </Button>
+          <div className="relative shrink-0">
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={(e) => onDateChange(e.target.value)}
+              className="absolute inset-0 opacity-0 pointer-events-none"
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-2 shrink-0 border-slate-200"
+              onClick={handleDateButtonClick}
+            >
+              <Calendar size={14} className="text-brand-600" />
+              <span className="truncate font-bold text-slate-700">{formatDateLabel(selectedDate)}</span>
+              <ChevronDown size={12} className="text-slate-400" />
+            </Button>
+          </div>
 
           <label className={cn(
             "flex items-center gap-3 px-4 py-2 rounded-2xl cursor-pointer whitespace-nowrap border transition-all active:scale-95 shadow-sm shrink-0",
@@ -58,7 +94,7 @@ const AttendancePage = ({
             <span className="text-sm leading-none">Public Holiday</span>
           </label>
 
-          <Button variant="secondary" size="square" className="ml-auto shrink-0">
+          <Button variant="secondary" size="square" className="ml-auto shrink-0 border-slate-200 text-slate-500">
             <Filter size={18} />
           </Button>
         </div>
@@ -66,18 +102,31 @@ const AttendancePage = ({
         <div className="px-4 pb-4 space-y-4">
           <div className="flex justify-between items-center px-1">
             <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">Attendance Sheet</h2>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="xs" className="p-1 border-0">
+            <div className="flex gap-2 items-center">
+              <Button variant="ghost" size="xs" className="p-1 border-0 text-slate-400 hover:text-slate-600">
                 <RefreshCw size={16} />
               </Button>
+
               <Button
                 variant={isLocked ? 'secondary' : 'outline'}
                 size="sm"
-                className={cn(isLocked && "bg-amber-50 border-amber-200 text-amber-600")}
+                className={cn(
+                  "h-9 px-3",
+                  isLocked && "bg-amber-50 border-amber-200 text-amber-600"
+                )}
                 onClick={() => setIsLocked(!isLocked)}
               >
-                <Lock size={12} className="mr-1.5" />
-                {isLocked ? 'Locked' : 'Lock List'}
+                <Lock size={12} className={cn(isLocked ? "mr-1.5" : "")} />
+                {isLocked ? <span className="text-xs font-bold">Locked</span> : null}
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                className="h-9 px-3 shadow-md shadow-brand-100"
+              >
+                <Save size={14} className="mr-1.5" />
+                <span className="text-xs font-bold">Finalize</span>
               </Button>
             </div>
           </div>
@@ -114,13 +163,6 @@ const AttendancePage = ({
             isSunday
           }}
         />
-
-        <div className="absolute bottom-6 left-0 right-0 z-40 px-6 pointer-events-none">
-          <Button variant="primary" size="lg" className="w-full h-15 pointer-events-auto shadow-2xl shadow-brand-200 flex items-center justify-center gap-3">
-            <Save size={20} />
-            Finalize Records
-          </Button>
-        </div>
       </div>
     </div>
   );
