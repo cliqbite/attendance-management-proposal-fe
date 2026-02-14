@@ -1,55 +1,67 @@
 @import "tailwindcss";
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light;
-  color: rgba(0, 0, 0, 0.87);
-  background-color: #f9fafb;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
 @theme {
-  --color-attendance-present: #10b981;
-  --color-attendance-absent: #ef4444;
-  --color-attendance-leave: #f59e0b;
-  --color-attendance-half: #3b82f6;
-  --color-attendance-holiday: #8b5cf6;
-  --color-attendance-sunday: #4b5563;
-  --color-attendance-locked: #9ca3af;
-  --color-attendance-ot: #14b8a6;
-  --radius-enterprise: 12px;
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Premium Color Palette */
+  --color-brand-50: #f0f7ff;
+  --color-brand-100: #e0effe;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-200: #e2e8f0;
+
+  /* Refined Shadows */
+  --shadow-premium: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-inner-soft: inset 0 2px 4px 0 rgb(0 0 0 / 0.02);
 }
 
-/* Custom Utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
 }
 
-.shadow-enterprise {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+@layer components {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .glass-effect {
+    @apply bg-white/70 backdrop-blur-xl border-b border-white/20;
+  }
+
+  .card-premium {
+    @apply bg-white rounded-3xl border border-slate-100/50 shadow-premium transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-linear-to-br from-brand-600 to-brand-700 text-white font-bold rounded-2xl shadow-lg shadow-brand-100 active:scale-95 transition-all;
+  }
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }

@@ -1,34 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
-import DashboardCards from './components/DashboardCards';
-import AttendanceCard from './components/AttendanceCard';
 import EmployeeDetail from './components/EmployeeDetail';
-import { Save, RefreshCw, Lock } from 'lucide-react';
+import { apiService } from './services/api';
 
-const initialEmployees = [
-  { id: 'EMP001', name: 'Shubham Kumar', status: 'present', isOT: false, otHours: 0 },
-  { id: 'EMP002', name: 'Anjali Sharma', status: 'present', isOT: true, otHours: 2.5 },
-  { id: 'EMP003', name: 'Rajesh Patel', status: 'absent', isOT: false, otHours: 0 },
-  { id: 'EMP004', name: 'Priya Singh', status: 'half', isOT: false, otHours: 0 },
-  { id: 'EMP005', name: 'Vikram Aditya', status: 'present', isOT: true, otHours: 4 },
-  { id: 'EMP006', name: 'Sneha Reddy', status: 'leave', isOT: false, otHours: 0 },
-];
+// Pages
+import DashboardPage from './pages/DashboardPage';
+import AttendancePage from './pages/AttendancePage';
+import EmployeesPage from './pages/EmployeesPage';
+import ReportsPage from './pages/ReportsPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
-  const [employees, setEmployees] = useState(initialEmployees);
+  const queryClient = useQueryClient();
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
 
+  // Fetch Employees
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ['employees'],
+    queryFn: apiService.getEmployees,
+  });
+
+  // Mutations
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }) => apiService.updateEmployeeStatus(id, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
+  const otToggleMutation = useMutation({
+    mutationFn: ({ id, isOT, otUnits }) => apiService.updateEmployeeOT(id, isOT, otUnits),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
+  const otChangeMutation = useMutation({
+    mutationFn: ({ id, units }) => apiService.updateEmployeeOT(id, true, units),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
+  const holidayMutation = useMutation({
+    mutationFn: ({ id, isWorking }) => apiService.updateHolidayWorking(id, isWorking),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
+  const sundayMutation = useMutation({
+    mutationFn: ({ id, isWorking }) => apiService.updateSundayWorking(id, isWorking),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
+  const publicHolidayBulkMutation = useMutation({
+    mutationFn: (isHoliday) => apiService.setPublicHoliday(isHoliday),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+  });
+
   const handleStatusChange = (id, status) => {
     if (isLocked) return;
-    setEmployees(prev => prev.map(emp => emp.id === id ? { ...emp, status } : emp));
+    statusMutation.mutate({ id, status });
   };
 
   const handleOTToggle = (id, isOT) => {
     if (isLocked) return;
-    setEmployees(prev => prev.map(emp => emp.id === id ? { ...emp, isOT, otHours: isOT ? 1 : 0 } : emp));
+    otToggleMutation.mutate({ id, isOT, otUnits: isOT ? 1 : 0 });
+  };
+
+  const handleOTChange = (id, units) => {
+    if (isLocked) return;
+    otChangeMutation.mutate({ id, units });
+  };
+
+  const handleHolidayToggle = (id, isWorking) => {
+    if (isLocked) return;
+    holidayMutation.mutate({ id, isWorking });
+  };
+
+  const handleSundayToggle = (id, isWorking) => {
+    if (isLocked) return;
+    sundayMutation.mutate({ id, isWorking });
+  };
+
+  const handlePublicHolidayToggle = (isHoliday) => {
+    if (isLocked) return;
+    publicHolidayBulkMutation.mutate(isHoliday);
   };
 
   const openDetails = (emp) => {
@@ -36,57 +91,69 @@ function App() {
     setIsDetailOpen(true);
   };
 
+  const stats = useMemo(() => {
+    const counts = { total: employees.length, present: 0, absent: 0, leave: 0, ot: 0 };
+    employees.forEach(emp => {
+      if (emp.status === 'present') counts.present++;
+      if (emp.status === 'absent') counts.absent++;
+      if (emp.status === 'leave') counts.leave++;
+      if (emp.isOT) counts.ot++;
+    });
+    return counts;
+  }, [employees]);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-white flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 border-4 border-blue-50 border-t-brand-600 rounded-full animate-spin mb-4 shadow-lg shadow-brand-50"></div>
+        <p className="text-sm font-black text-slate-400 uppercase tracking-widest animate-pulse">Initializing System...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 font-sans">
-      <Header />
+    <BrowserRouter>
+      {/* Root Container: Force height to 100dvh and hide overflow to prevent window scrolling */}
+      <div className="h-[100dvh] bg-slate-50 font-sans overflow-hidden flex flex-col relative">
+        <Header />
 
-      <main className="px-4 pt-2">
-        <DashboardCards />
-
-        <div className="flex justify-between items-center mb-4 mt-2">
-          <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">Attendance Sheet</h2>
-          <div className="flex gap-2">
-            <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 text-gray-400 active:rotate-180 transition-transform duration-500">
-              <RefreshCw size={16} />
-            </button>
-            <button
-              onClick={() => setIsLocked(!isLocked)}
-              className={`p-2 rounded-xl shadow-sm border transition-colors flex items-center gap-1 ${isLocked ? 'bg-amber-50 border-amber-200 text-amber-600' : 'bg-white border-gray-100 text-gray-400'}`}
-            >
-              <Lock size={16} />
-              {isLocked && <span className="text-[10px] font-black uppercase">Locked</span>}
-            </button>
-          </div>
-        </div>
-
-        <div className={isLocked ? 'opacity-70 pointer-events-none' : ''}>
-          {employees.map(emp => (
-            <AttendanceCard
-              key={emp.id}
-              {...emp}
-              onStatusChange={(status) => handleStatusChange(emp.id, status)}
-              onOTToggle={(isOT) => handleOTToggle(emp.id, isOT)}
-              onDetailClick={() => openDetails(emp)}
+        {/* Main Content Area: Flex-1 to fill space, also hide overflow to let children manage it */}
+        <main className="flex-1 overflow-hidden flex flex-col relative">
+          <Routes>
+            <Route path="/" element={<Navigate to="/attendance" replace />} />
+            <Route path="/dashboard" element={<DashboardPage stats={stats} />} />
+            <Route
+              path="/attendance"
+              element={
+                <AttendancePage
+                  employees={employees}
+                  onStatusChange={handleStatusChange}
+                  onOTToggle={handleOTToggle}
+                  onOTChange={handleOTChange}
+                  onHolidayToggle={handleHolidayToggle}
+                  onSundayToggle={handleSundayToggle}
+                  onPublicHolidayToggle={handlePublicHolidayToggle}
+                  onDetailClick={openDetails}
+                  isLocked={isLocked}
+                  setIsLocked={setIsLocked}
+                />
+              }
             />
-          ))}
-        </div>
+            <Route path="/employees" element={<EmployeesPage employees={employees} onDetailClick={openDetails} />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </main>
 
-        <div className="mt-8 mb-4">
-          <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-            <Save size={18} />
-            Save Attendance
-          </button>
-        </div>
-      </main>
+        <EmployeeDetail
+          isOpen={isDetailOpen}
+          onClose={() => setIsDetailOpen(false)}
+          employee={selectedEmployee}
+        />
 
-      <EmployeeDetail
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        employee={selectedEmployee}
-      />
-
-      <BottomNav />
-    </div>
+        <BottomNav />
+      </div>
+    </BrowserRouter>
   );
 }
 

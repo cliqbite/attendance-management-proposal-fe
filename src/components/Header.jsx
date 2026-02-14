@@ -1,34 +1,36 @@
 import React from 'react';
-import { Calendar, Filter, ChevronDown, UserCircle } from 'lucide-react';
+import { UserCircle } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { APP_CONFIG } from '../constants';
+import Button from './atoms/Button';
 
 const Header = () => {
+  const location = useLocation();
+
+  const getTitle = () => {
+    const path = location.pathname;
+    const titles = {
+      '/dashboard': 'Dashboard',
+      '/employees': 'Employees',
+      '/attendance': 'Attendance',
+      '/reports': 'Reports',
+      '/settings': 'Settings'
+    };
+    return titles[path] || 'Attendance';
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-sm px-4 py-3">
-      <div className="flex justify-between items-center mb-4">
+    <header className="flex-none z-50 px-4 py-4 border-b border-slate-100 bg-white shadow-xs">
+      <div className="flex justify-between items-center max-w-lg mx-auto w-full">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Attendance</h1>
-          <p className="text-xs text-gray-500 font-medium font-sans">Harohalli Education Society</p>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1.5">{getTitle()}</h1>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-none">
+            {APP_CONFIG.companyName}
+          </p>
         </div>
-        <button className="p-1 text-gray-400 hover:text-gray-600">
-          <UserCircle size={28} strokeWidth={1.5} />
-        </button>
-      </div>
-
-      <div className="flex gap-2 pb-1 overflow-x-auto no-scrollbar">
-        <button className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl shadow-sm hover:bg-white transition-all">
-          <Calendar size={16} className="text-blue-600" />
-          <span className="text-sm font-semibold truncate">Feb 14, 2026</span>
-          <ChevronDown size={14} className="text-gray-400" />
-        </button>
-
-        <label className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl shadow-sm cursor-pointer whitespace-nowrap">
-          <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-          <span className="text-sm font-semibold text-purple-700">Public Holiday</span>
-        </label>
-
-        <button className="flex items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
-          <Filter size={18} className="text-gray-600" />
-        </button>
+        <Button variant="ghost" size="square" className="rounded-2xl bg-slate-50 border-slate-100/50">
+          <UserCircle size={26} strokeWidth={1.5} />
+        </Button>
       </div>
     </header>
   );

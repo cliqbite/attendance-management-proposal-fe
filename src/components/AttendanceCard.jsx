@@ -1,93 +1,138 @@
 import React from 'react';
-import { ChevronRight, Clock, Info } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
+import { Clock, Info, ShieldCheck, CalendarRange, UserCheck, Minus, Plus } from 'lucide-react';
+import { cn } from '../utils/cn';
+import Button from './atoms/Button';
+import Toggle from './atoms/Toggle';
 
 const AttendanceCard = ({
   id,
   name,
   status,
   isOT,
-  otHours,
+  otUnits = 0,
+  isHolidayWorking = false,
+  isSundayWorking = false,
+  isPublicHoliday = false,
+  isSunday = false,
   onStatusChange,
   onOTToggle,
+  onOTChange,
+  onHolidayToggle,
+  onSundayToggle,
   onDetailClick
 }) => {
-  const statusConfig = {
-    present: { label: 'P', color: 'text-white', bg: 'bg-emerald-500' },
-    absent: { label: 'A', color: 'text-white', bg: 'bg-rose-500' },
-    leave: { label: 'CL', color: 'text-white', bg: 'bg-amber-500' },
-    half: { label: 'HD', color: 'text-white', bg: 'bg-blue-500' },
-    holiday: { label: 'PH', color: 'text-white', bg: 'bg-purple-500' },
-    sunday: { label: 'S', color: 'text-white', bg: 'bg-gray-500' },
+  const getAvatarColor = () => {
+    const colors = ['bg-indigo-50 text-indigo-600', 'bg-emerald-50 text-emerald-600', 'bg-amber-50 text-amber-600', 'bg-rose-50 text-rose-600'];
+    const index = (id.slice(-1).charCodeAt(0)) % colors.length;
+    return colors[index];
+  };
+
+  const handleOTUpdate = (change) => {
+    const newVal = Math.max(0, otUnits + change);
+    if (onOTChange) onOTChange(newVal);
   };
 
   return (
-    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-3 transition-all duration-300">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex gap-3 items-center">
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-semibold border-2 border-white shadow-sm">
+    <div className="bg-white p-5 rounded-[2.5rem] border border-slate-100 transition-all duration-300 shadow-sm hover:shadow-md animate-fade-in mx-0.5">
+      <div className="flex justify-between items-center mb-5">
+        <div className="flex gap-4 items-center">
+          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner transition-all", getAvatarColor())}>
             {name.split(' ').map(n => n[0]).join('')}
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 leading-tight">{name}</h3>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{id}</p>
+            <h3 className="font-black text-slate-900 leading-tight text-base tracking-tight uppercase">{name}</h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em]">{id}</span>
+              {status === 'present' && <UserCheck size={12} className="text-emerald-500" />}
+            </div>
           </div>
         </div>
-        <button
-          onClick={onDetailClick}
-          className="p-1 text-gray-300 hover:text-blue-500 transition-colors"
-        >
-          <Info size={20} />
-        </button>
+        <Button variant="ghost" size="square" onClick={onDetailClick} className="rounded-2xl border-slate-50">
+          <Info size={20} className="text-slate-300" strokeWidth={2} />
+        </Button>
       </div>
 
-      <div className="flex items-center justify-between gap-2 mb-4">
-        {['present', 'absent', 'leave', 'half'].map((key) => (
-          <button
-            key={key}
-            onClick={() => onStatusChange(key)}
-            className={cn(
-              "flex-1 h-10 rounded-xl transition-all flex items-center justify-center font-bold text-xs",
-              status === key
-                ? `${statusConfig[key].bg} ${statusConfig[key].color} shadow-lg shadow-blue-100 scale-105`
-                : "bg-gray-50 text-gray-500 border border-gray-100"
-            )}
-          >
-            {statusConfig[key].label}
-          </button>
-        ))}
-      </div>
+      {!isPublicHoliday && !isSunday && (
+        <div className="grid grid-cols-4 gap-2.5 mb-5">
+          <Button
+            variant={status === 'present' ? 'emerald' : 'secondary'}
+            size="sm"
+            onClick={() => onStatusChange('present')}
+            className="h-11 rounded-2xl"
+          >P</Button>
+          <Button
+            variant={status === 'absent' ? 'danger' : 'secondary'}
+            size="sm"
+            onClick={() => onStatusChange('absent')}
+            className="h-11 rounded-2xl"
+          >A</Button>
+          <Button
+            variant={status === 'leave' ? 'purple' : 'secondary'}
+            size="sm"
+            onClick={() => onStatusChange('leave')}
+            className="h-11 rounded-2xl"
+          >CL</Button>
+          <Button
+            variant={status === 'half' ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => onStatusChange('half')}
+            className="h-11 rounded-2xl"
+          >HD</Button>
+        </div>
+      )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <div className="relative">
-            <input
-              type="checkbox"
-              className="peer sr-only"
+      <div className="space-y-3.5 p-4 bg-slate-50/50 rounded-3xl border border-slate-100/30">
+        <div className="flex items-center justify-between min-h-[44px]">
+          <div className="flex items-center gap-3">
+            <Toggle
+              variant="teal"
               checked={isOT}
-              onChange={(e) => onOTToggle(e.target.checked)}
+              onChange={onOTToggle}
             />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+            <div className="flex flex-col">
+              <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", isOT ? "text-teal-700" : "text-slate-500")}>
+                OT Units
+              </span>
+              <span className="text-[8px] font-bold text-slate-400 leading-none">1 Unit = 4 Hrs</span>
+            </div>
           </div>
-          <span className="text-xs font-bold text-gray-600 group-hover:text-teal-600 transition-colors uppercase tracking-tight flex items-center gap-1">
-            <Clock size={12} /> OT Mode
-          </span>
-        </label>
 
-        {isOT && (
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              value={otHours}
-              readOnly
-              className="w-12 h-8 bg-teal-50 border border-teal-100 rounded-lg text-teal-700 text-center font-bold text-sm focus:outline-none"
+          {isOT && (
+            <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-xl border border-teal-100 shadow-sm animate-fade-in">
+              <Button size="xs" variant="ghost" onClick={() => handleOTUpdate(-1)} disabled={otUnits <= 0} className="w-8 h-8 border-0 active:bg-teal-50">
+                <Minus size={14} strokeWidth={3} className="text-teal-600" />
+              </Button>
+              <span className="text-sm font-black text-teal-700 min-w-[1.2rem] text-center">{otUnits}</span>
+              <Button size="xs" variant="ghost" onClick={() => handleOTUpdate(1)} className="w-8 h-8 border-0 active:bg-teal-50">
+                <Plus size={14} strokeWidth={3} className="text-teal-600" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {isPublicHoliday && (
+          <div className="flex items-center gap-3 min-h-[44px]">
+            <Toggle
+              variant="purple"
+              checked={isHolidayWorking}
+              onChange={onHolidayToggle}
             />
-            <span className="text-[10px] font-bold text-teal-600 uppercase">Hrs</span>
+            <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", isHolidayWorking ? "text-purple-700" : "text-slate-500")}>
+              Holiday Work
+            </span>
+          </div>
+        )}
+
+        {isSunday && (
+          <div className="flex items-center gap-3 min-h-[44px]">
+            <Toggle
+              variant="indigo"
+              checked={isSundayWorking}
+              onChange={onSundayToggle}
+            />
+            <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", isSundayWorking ? "text-indigo-700" : "text-slate-500")}>
+              Sunday Work
+            </span>
           </div>
         )}
       </div>

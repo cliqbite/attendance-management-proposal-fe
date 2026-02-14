@@ -1,26 +1,33 @@
 import React from 'react';
-import { LayoutDashboard, Users, CalendarCheck, FileText, Settings } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { NAV_ITEMS } from '../constants';
 
 const BottomNav = () => {
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: false },
-    { icon: Users, label: 'Employees', active: false },
-    { icon: CalendarCheck, label: 'Attendance', active: true },
-    { icon: FileText, label: 'Reports', active: false },
-    { icon: Settings, label: 'Settings', active: false },
-  ];
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-lg flex justify-around items-center py-2 px-1 pb-safe z-50 border-t border-gray-100">
-      {navItems.map((item, idx) => (
-        <button
+    <nav className="flex-none bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around items-center py-3 px-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] z-50">
+      {NAV_ITEMS.map((item, idx) => (
+        <NavLink
           key={idx}
-          className={`flex flex-col items-center justify-center space-y-1 py-1 px-2 rounded-xl transition-colors ${item.active ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-900'
-            }`}
+          to={item.path}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center gap-1.5 px-4 py-1 rounded-2xl transition-all duration-300 ${isActive
+              ? 'text-brand-600 bg-brand-50/50 scale-105'
+              : 'text-slate-400 hover:text-slate-600'
+            }`
+          }
         >
-          <item.icon size={22} />
-          <span className="text-[10px] font-medium tracking-tight">{item.label}</span>
-        </button>
+          {({ isActive }) => (
+            <>
+              <item.icon
+                size={20}
+                className={isActive ? 'stroke-[3]' : 'stroke-[2]'}
+              />
+              <span className="text-[10px] font-black tracking-widest uppercase leading-none">
+                {item.label}
+              </span>
+            </>
+          )}
+        </NavLink>
       ))}
     </nav>
   );
